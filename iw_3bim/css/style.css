@@ -1,0 +1,8 @@
+.barra {
+    width: 100%;
+}
+label {
+    display: inline;
+    width: 5em;
+}
+#draggable { width: 300px; height: 150px; padding: 0.5em; }

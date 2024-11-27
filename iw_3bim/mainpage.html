@@ -1,0 +1,237 @@
+<!-- 
+
+1. A área em volta do botão 'VER CADASTROS' é draggable via jQuery
+2. Passar o mouse em cima da form-label 'Data de Nascimento' mostra um tool tip via jQuery
+3. No final da página há um accordion via jQuery
+
+-->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="bs/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    
+    <script src="js/jquery-3.7.1.min.js"></script>
+    <script src="js/jquery-3.7.1.min.map.js"></script>
+    <script src="bs/js/bootstrap.bundle.min.js"></script>
+    <script src="js/mainpage-script.js"></script>
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            let botao = $('#botao1');
+            let cep = $('#cep');
+            let rua = $('#rua');
+            let numero = $('#numero');
+            let bairro = $('#bairro');
+            let cidade = $('#cidade');
+            let estado = $('#estado');
+            let complemento = $('#complemento');
+
+            botao.on("click", function() {
+                let servidor = "https://viacep.com.br/ws/" + cep.val() + "/json/";
+
+                fetch(servidor).then((resp) => { return resp.json(); })
+                .then((data) => {
+                    rua.val(data['logradouro'] || 'Vazio');
+                    numero.val(data['unidade'] || 'Vazio');
+                    bairro.val(data['bairro'] || 'Vazio');
+                    cidade.val(data['localidade'] || 'Vazio');
+                    estado.val(data['uf'] || 'Vazio');
+                    complemento.val(data['complemento'] || 'Vazio');
+                })
+                .catch((er) => console.error(er));
+            });
+
+            $('#rg').on('input', function (e) {
+                let rg = e.target.value.replace(/\D/g, '')
+                    .replace(/^(\d{2})(\d)/, '$1.$2')
+                    .replace(/(\d{3})(\d)/, '$1.$2')
+                    .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                e.target.value = rg;
+            });
+
+            $("#accordion").accordion();
+            $( document ).tooltip();
+
+        });
+
+        $(document).ready(function(){
+        $("#draggable").draggable();
+    });
+        
+
+        function cpf(v) {
+            v = v.replace(/\D/g, "")
+            v = v.replace(/(\d{3})(\d)/, "$1.$2")
+            v = v.replace(/(\d{3})(\d)/, "$1.$2")
+            v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+            return v
+        }
+
+        function formatarcpf(input) {
+            $(input).val(cpf(input.value));
+        }
+
+        const mascaraTel = (event) => {
+            let input = event.target
+            input.value = phoneMask(input.value)
+        }
+
+        const phoneMask = (value) => {
+            if (!value) return ""
+            value = value.replace(/\D/g, '')
+            value = value.replace(/(\d{2})(\d)/, "($1) $2")
+            value = value.replace(/(\d)(\d{4})$/, "$1-$2")
+            return value
+        }
+
+        const mascaraCEP = (event) => {
+            let input = event.target
+            input.value = zipCodeMask(input.value)
+        }
+
+        const zipCodeMask = (value) => {
+            if (!value) return ""
+            value = value.replace(/\D/g, '')
+            value = value.replace(/(\d{5})(\d)/, '$1-$2')
+            return value
+        }
+    </script>
+
+    <title>IW3</title>
+</head>
+
+<body>
+    <nav class="navbar justify-content-center bg-dark"> 
+        <p class="fw-bold text-white fs-3 mt-1">Formulário - Cadastro</p>
+    </nav>
+
+    <div class="container">
+        <div id="draggable" class=""><a href="db-viewcadastros.php"><button type="button" class="btn btn-secondary fw-bold mt-5">VER CADASTROS</button></a></div>
+        <form id="usuario" action="db-procdata.php" method="get">
+            <div class="row mt-5">
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="nome" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="nome" name="nome" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <a href="#" class="text-decoration-none text-black" title="Pedimos por sua data de nascimento apenas por propósitos de segurança."><label for="data_nascimento" class="form-label">Data de Nascimento</label>
+                        <input type="date" class="form-control" id="data_nascimento" name="data_nascimento" required></a>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">E-mail</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="telefone" class="form-label">Telefone</label>
+                        <input type="tel" onkeyup="mascaraTel(event)" class="form-control" id="telefone" name="telefone" required maxlength="15">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="cep" class="form-label">CEP</label>
+                        <input type="text" onkeyup="mascaraCEP(event)" class="form-control" id="cep" name="cep" required maxlength="9">
+                        <button type="button" class="btn btn-success mt-1" id="botao1">Mostrar endereço</button>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="rua" class="form-label">Rua</label>
+                        <input type="text" class="form-control" id="rua" name="rua" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="numero" class="form-label">Número</label>
+                        <input type="text" class="form-control" id="numero" name="numero" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="bairro" class="form-label">Bairro</label>
+                        <input type="text" class="form-control" id="bairro" name="bairro" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="cidade" class="form-label">Cidade</label>
+                        <input type="text" class="form-control" id="cidade" name="cidade" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="estado" class="form-label">Estado</label>
+                        <input type="text" class="form-control" id="estado" name="estado" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="complemento" class="form-label">Complemento</label>
+                        <input type="text" class="form-control" id="complemento" name="complemento" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="assunto" class="form-label">Assunto</label>
+                        <input type="text" class="form-control" id="assunto" name="assunto" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="mensagem" class="form-label">Mensagem</label>
+                        <textarea class="form-control" id="mensagem" name="mensagem" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="senha" class="form-label">Senha</label>
+                        <input type="password" class="form-control" id="senha" name="senha" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="cpf" class="form-label">CPF</label>
+                        <input type="text" class="form-control" id="cpf" name="cpf" oninput="formatarcpf(this)" required maxlength="14">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="rg" class="form-label">RG</label>
+                        <input type="text" class="form-control" id="rg" name="rg" required maxlength="13">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-2 mb-3">
+                <div class="col mt-2" id="json">
+                    <button type="submit" class="btn btn-success fw-bold">CADASTRAR</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <div id="accordion" class="mt-5">
+        <h3>Como ver seu endereço?</h3>
+        <div>
+            <p>
+           Digite seu CEP para pesquisar precisamente sua casa.
+            </p>
+        </div>
+        <h3>O que significa CEP?</h3>
+        <div>
+            <p>
+            Significa Código de Endereçamento Postal.
+            </p>
+        </div>
+        <h3>Quem criou o CEP?</h3>
+        <div>
+            <p>
+            A Empresa Brasileira de Correios e Telégrafo (ECT) em 1971.
+            </p>
+        </div>
+    </div>
+    </div>
+</body>
+
+</html>
